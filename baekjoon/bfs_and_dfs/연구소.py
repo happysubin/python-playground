@@ -9,24 +9,23 @@ for _ in range(x):
     graph.append(list(map(int, input().split())))
 
 
+# 빈 칸 좌표를 미리 저장
+empties = [(i, j) for i in range(x) for j in range(y) if graph[i][j] == 0]
+
 # 1. 벽을 3개 짓는 모든 경우를 수행
-def dfs(cnt):
+def dfs(cnt, start):
     global answer
 
     # 3개 이상 벽을 못세운다.
     if cnt == 3:
-        result = bfs()
-        answer = max(answer, result)
+        answer = max(answer, bfs())
         return
 
-    for i in range(len(graph)):
-        for j in range(len(graph[i])):
-            if graph[i][j] == 0:
-                graph[i][j] = 1
-                dfs(cnt + 1)
-                # 백트래킹
-                graph[i][j] = 0
-    
+    for k in range(start, len(empties)):
+        i, j = empties[k]
+        graph[i][j] = 1
+        dfs(cnt + 1, k + 1)
+        graph[i][j] = 0    
 
 def bfs() -> int:  
     visited = [[False] * y for _ in range(x)]
@@ -55,5 +54,6 @@ def bfs() -> int:
             if not visited[i][j] and graph[i][j] == 0:
                 result += 1
     return result
-dfs(0)
+
+dfs(0, 0)
 print(answer)
