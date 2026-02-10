@@ -1,30 +1,68 @@
 from collections import deque
 
-# 노드의 개수
-n = int(input())
-answer = 0
+# =========================
+# 입력
+# =========================
 
-# 이건 0을 사용 안하기 위함
+n = int(input())
+
+# 인접 리스트 (1-indexed)
 tree = [[] for _ in range(n + 1)]
 
-
-# 이건 n - 1번 만큼
-for i in range(n - 1):
+# 트리는 간선이 n-1개
+for _ in range(n - 1):
     a, b, c = map(int, input().split())
+    # 양방향 연결 + 가중치
     tree[a].append((b, c))
     tree[b].append((a, c))
 
-def dfs(start, visited, cnt) -> int: 
-    result = cnt
-    for c, c_value in tree[start]:
-        if not visited[c]:
-            visited[c] = True 
-            result = max(result, dfs(c, visited, cnt + c_value))
-    return result
 
-# 모드 ㄴ노드에서 한번씩은 수행
-for i in range(1, n + 1):
-    visited = [False] * (n + 1)
-    answer = max(answer, dfs(i, visited, 0))
+# =========================
+# 스택 DFS: 가장 먼 노드 찾기
+# =========================
+def farthest(start):
 
-print(answer)
+    # start로부터 각 노드까지의 거리
+    # -1이면 아직 방문 안 함
+    dist = [-1] * (n + 1)
+    dist[start] = 0
+
+    # (현재 노드, 부모 노드)
+    stack = [(start, 0)]
+
+    while stack:
+        u, parent = stack.pop()
+
+        # u와 연결된 이웃 노드 탐색
+        for v, w in tree[u]:
+            # 부모로 되돌아가는 간선은 무시
+            if v == parent:
+                continue
+
+            # v는 처음 방문하므로 거리 계산
+            dist[v] = dist[u] + w
+
+            # 다음 탐색을 위해 스택에 push
+            stack.append((v, u))
+
+    # 가장 먼 노드 찾기
+    far_node = 1
+    for i in range(1, n + 1):
+        if dist[i] > dist[far_node]:
+            far_node = i
+
+    print(dist)
+    return far_node, dist[far_node]
+
+
+# =========================
+# 트리 지름 계산
+# =========================
+
+# 1️⃣ 아무 노드(1)에서 가장 먼 노드 찾기
+u, _ = farthest(1)
+print(u)
+# 2️⃣ u에서 다시 가장 먼 거리 → 지름
+_, diameter = farthest(u)
+
+print(diameter)
